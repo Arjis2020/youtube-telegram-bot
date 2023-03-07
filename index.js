@@ -6,6 +6,7 @@ import { config } from 'dotenv'
 config()
 
 const TELEGRAM_BOT = process.env.TELEGRAM_BOT;
+console.log(TELEGRAM_BOT)
 
 const bot = new TelegramBot(TELEGRAM_BOT, { polling: true, filepath: false })
 
