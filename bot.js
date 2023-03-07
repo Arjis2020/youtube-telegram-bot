@@ -24,6 +24,7 @@ bot.command('audio', async (message) => {
         })
         registration.on('data', function (chunk) { mw.writeChunk(chunk) })
         registration.on('end', async function () {
+            console.log("done")
             await bot.api.sendAudio(chatId, new InputFile(readFromMemory(chatId), title))
             mw.close()
         })
