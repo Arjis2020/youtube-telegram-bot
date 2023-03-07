@@ -22,7 +22,10 @@ bot.command('audio', async (message) => {
         const registration = ytdl(url, {
             filter: 'audioonly'
         })
-        registration.on('data', function (chunk) { mw.writeChunk(chunk) })
+        registration.on('data', function (chunk) {
+            console.log("data") 
+            mw.writeChunk(chunk) 
+        })
         registration.on('end', async function () {
             console.log("done")
             await bot.api.sendAudio(chatId, new InputFile(readFromMemory(chatId), title))
