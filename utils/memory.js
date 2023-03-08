@@ -1,3 +1,6 @@
+import Stream from 'stream'
+const Writable = Stream.Writable
+
 var memStore = {};
 
 export class MemoryWriter {
@@ -12,6 +15,19 @@ export class MemoryWriter {
     }
     close(){
         delete memStore[this.key]
+    }
+}
+
+export class MemoryWriterStream extends Writable {
+    constructor(key) {
+        if(!key) throw new Error('key cannot be undefined')
+        this.key = key
+        memStore[this.key] = Buffer.from('')
+    }
+    _write(chunk, enc, cb) {
+        const _buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, enc)
+        memStore[this.key] = Buffer.concat([memStore[this.key], _buffer])
+        cb()
     }
 }
 

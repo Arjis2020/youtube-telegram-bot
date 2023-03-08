@@ -2,41 +2,37 @@ import { Bot, webhookCallback, InputFile } from "grammy";
 import express from "express";
 import { config } from "dotenv";
 import ytdl from "ytdl-core";
-import { MemoryWriter, readFromMemory } from "./utils/memory.js";
-import EventEmitter from 'events'
+import { MemoryWriter, MemoryWriterStream, readFromMemory } from "./utils/memory.js";
 
 config()
 
 const bot = new Bot(process.env.TELEGRAM_BOT)
-
-const eventEmitter = new EventEmitter()
-eventEmitter.on('start', () => console.log("started"))
 
 bot.command('audio', async (message) => {
     const url = message.match
     const chatId = message.chat.id
 
     if (ytdl.validateURL(url)) {
-        const mw = new MemoryWriter(chatId)
+        const mw = new MemoryWriterStream(chatId)
 
         await bot.api.sendMessage(chatId, "Received your request. Please wait for a couple of minutes. This shouldn't take long :)")
         const info = await ytdl.getInfo(url)
         const title = info.videoDetails.title
 
         const registration = ytdl(url, {
-            filter: 'audioonly'
-        })
+            filter: 'audioonly',
+            quality: 'highestaudio'
+        }).pipe(mw)
         console.log("registered...")
-        eventEmitter.emit('start')
-        registration.on('error', (err) => console.log(err))
-        registration.on('close', () => console.log("closed"))
-        registration.on('pause', () => console.log("paused"))
-        registration.on('readable', () => console.log("readable"))
-        registration.on('resume', () => console.log("resume"))
-        registration.on('data', function (chunk) {
-            console.log("data")
-            mw.writeChunk(chunk)
-        })
+        // registration.on('error', (err) => console.log(err))
+        // registration.on('close', () => console.log("closed"))
+        // registration.on('pause', () => console.log("paused"))
+        // registration.on('readable', () => console.log("readable"))
+        // registration.on('resume', () => console.log("resume"))
+        // registration.on('data', function (chunk) {
+        //     console.log("data")
+        //     mw.writeChunk(chunk)
+        // })
         registration.on('end', async function () {
             console.log("done!")
             await bot.api.sendAudio(chatId, new InputFile(readFromMemory(chatId), title))
