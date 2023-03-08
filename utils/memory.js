@@ -5,7 +5,7 @@ var memStore = {};
 
 export class MemoryWriter {
     constructor(key) {
-        if(!key) throw new Error('key cannot be undefined')
+        if (!key) throw new Error('key cannot be undefined')
         this.key = key
         memStore[this.key] = Buffer.from('')
     }
@@ -13,14 +13,18 @@ export class MemoryWriter {
         const _buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
         memStore[this.key] = Buffer.concat([memStore[this.key], _buffer])
     }
-    close(){
+    close() {
         delete memStore[this.key]
     }
 }
 
 export class MemoryWriterStream extends Writable {
     constructor(key) {
-        if(!key) throw new Error('key cannot be undefined')
+        super(options)
+        if (!(this instanceof MemoryWriterStream)) {
+            return new MemoryWriterStream(key, options);
+        }
+        if (!key) throw new Error('key cannot be undefined')
         this.key = key
         memStore[this.key] = Buffer.from('')
     }
@@ -33,5 +37,5 @@ export class MemoryWriterStream extends Writable {
 
 export const readFromMemory = (key) => {
     return memStore[key]
-} 
+}
 
