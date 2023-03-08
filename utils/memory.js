@@ -19,7 +19,7 @@ export class MemoryWriter {
 }
 
 export class MemoryWriterStream extends Writable {
-    constructor(key) {
+    constructor(key, options) {
         super(options)
         if (!(this instanceof MemoryWriterStream)) {
             return new MemoryWriterStream(key, options);
