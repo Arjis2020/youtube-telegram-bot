@@ -16,38 +16,29 @@ bot.command('audio', async (message) => {
     if (ytdl.validateURL(url)) {
         const mw = new MemoryWriterStream(chatId)
 
-        await bot.api.sendMessage(chatId, "Received your request. Please wait for a couple of minutes. This shouldn't take long :)")
+        await message.reply("Received your request. Please wait for a couple of minutes. This shouldn't take long :)")
         const info = await ytdl.getInfo(url)
         const title = info.videoDetails.title
 
-        const registration = ytdl(url, {
+        ytdl(url, {
             filter: 'audioonly',
             quality: 'highestaudio'
-        }).pipe(mw)
-        console.log("registered...")
-        // registration.on('error', (err) => console.log(err))
-        // registration.on('close', () => console.log("closed"))
-        // registration.on('pause', () => console.log("paused"))
-        // registration.on('readable', () => console.log("readable"))
-        // registration.on('resume', () => console.log("resume"))
-        // registration.on('data', function (chunk) {
-        //     console.log("data")
-        //     mw.writeChunk(chunk)
-        // })
-        registration.on('end', async function () {
-            console.log("done!")
-            await bot.api.sendAudio(chatId, new InputFile(readFromMemory(chatId), title))
+        })
+        .pipe(mw)
+        .on('finish', async function () {
+            await message.replyWithAudio(new InputFile(readFromMemory(chatId), title))
             mw.close()
         })
     }
     else {
-        await bot.api.sendMessage(chatId, 'Invalid URL! Please send a valid URL.')
+        await message.reply('Invalid URL! Please send a valid URL.')
     }
 })
 
 if (process.env.NODE_ENV === 'production') {
     (async () => {
         const { data } = await axios.get(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT}/setWebhook?url=${process.env.CYCLIC_URL}`)
+        console.log(data)
         if (data.ok && data.result) {
             const app = express()
             const PORT = process.env.PORT || 9000
