@@ -3,6 +3,7 @@ import express from "express";
 import { config } from "dotenv";
 import ytdl from "ytdl-core";
 import { MemoryWriter, MemoryWriterStream, readFromMemory } from "./utils/memory.js";
+import axios from "axios";
 
 config()
 
@@ -45,15 +46,23 @@ bot.command('audio', async (message) => {
 })
 
 if (process.env.NODE_ENV === 'production') {
-    const app = express()
-    const PORT = process.env.PORT || 9000
+    (async () => {
+        const { data } = await axios.get(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT}/setWebhook?url=${process.env.CYCLIC_URL}`)
+        if (data.ok && data.result) {
+            const app = express()
+            const PORT = process.env.PORT || 9000
 
-    app.use(express.json())
-    app.use(webhookCallback(bot, 'express'))
+            app.use(express.json())
+            app.use(webhookCallback(bot, 'express'))
 
-    app.listen(PORT, () => {
-        console.log(`Bot is listening on PORT ${PORT}`)
-    })
+            app.listen(PORT, () => {
+                console.log(`Bot is listening on PORT ${PORT}`)
+            })
+        }
+        else {
+            console.log("Webhook setup failed")
+        }
+    })()
 }
 else {
     bot.start()
