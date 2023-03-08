@@ -23,6 +23,11 @@ bot.command('audio', async (message) => {
             filter: 'audioonly'
         })
         console.log("registered...")
+        registration.on('error', (err) => console.log(err))
+        registration.on('close', () => console.log("closed"))
+        registration.on('pause', () => console.log("paused"))
+        registration.on('readable', () => console.log("readable"))
+        registration.on('resume', () => console.log("resume"))
         registration.on('data', function (chunk) {
             console.log("data")
             mw.writeChunk(chunk) 
