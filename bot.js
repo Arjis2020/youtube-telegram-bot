@@ -24,11 +24,11 @@ bot.command('audio', async (message) => {
             filter: 'audioonly',
             quality: 'highestaudio'
         })
-        .pipe(mw)
-        .on('finish', async function () {
-            await message.replyWithAudio(new InputFile(readFromMemory(chatId), title))
-            mw.close()
-        })
+            .pipe(mw)
+            .on('finish', async function () {
+                await message.replyWithAudio(new InputFile(readFromMemory(chatId), title))
+                mw.close()
+            })
     }
     else {
         await message.reply('Invalid URL! Please send a valid URL.')
@@ -36,24 +36,15 @@ bot.command('audio', async (message) => {
 })
 
 if (process.env.NODE_ENV === 'production') {
-    (async () => {
-        const { data } = await axios.get(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT}/setWebhook?url=${process.env.CYCLIC_URL}`)
-        console.log(data)
-        if (data.ok && data.result) {
-            const app = express()
-            const PORT = process.env.PORT || 9000
+    const app = express()
+    const PORT = process.env.PORT || 9000
 
-            app.use(express.json())
-            app.use(webhookCallback(bot, 'express'))
+    app.use(express.json())
+    app.use(webhookCallback(bot, 'express'))
 
-            app.listen(PORT, () => {
-                console.log(`Bot is listening on PORT ${PORT}`)
-            })
-        }
-        else {
-            console.log("Webhook setup failed")
-        }
-    })()
+    app.listen(PORT, () => {
+        console.log(`Bot is listening on PORT ${PORT}`)
+    })
 }
 else {
     bot.start()
