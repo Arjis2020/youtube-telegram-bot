@@ -29,6 +29,7 @@ export class MemoryWriterStream extends Writable {
         memStore[this.key] = Buffer.from('')
     }
     _write(chunk, enc, cb) {
+        console.log("data")
         const _buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, enc)
         memStore[this.key] = Buffer.concat([memStore[this.key], _buffer])
         cb()
