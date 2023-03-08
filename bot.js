@@ -3,10 +3,14 @@ import express from "express";
 import { config } from "dotenv";
 import ytdl from "ytdl-core";
 import { MemoryWriter, readFromMemory } from "./utils/memory.js";
+import EventEmitter from 'events'
 
 config()
 
 const bot = new Bot(process.env.TELEGRAM_BOT)
+
+const eventEmitter = new EventEmitter()
+eventEmitter.on('start', () => console.log("started"))
 
 bot.command('audio', async (message) => {
     const url = message.match
@@ -23,6 +27,7 @@ bot.command('audio', async (message) => {
             filter: 'audioonly'
         })
         console.log("registered...")
+        eventEmitter.emit('start')
         registration.on('error', (err) => console.log(err))
         registration.on('close', () => console.log("closed"))
         registration.on('pause', () => console.log("paused"))
@@ -30,7 +35,7 @@ bot.command('audio', async (message) => {
         registration.on('resume', () => console.log("resume"))
         registration.on('data', function (chunk) {
             console.log("data")
-            mw.writeChunk(chunk) 
+            mw.writeChunk(chunk)
         })
         registration.on('end', async function () {
             console.log("done!")
@@ -43,7 +48,7 @@ bot.command('audio', async (message) => {
     }
 })
 
-if(process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production') {
     const app = express()
     const PORT = process.env.PORT || 9000
 
